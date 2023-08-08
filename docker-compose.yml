@@ -1,11 +1,11 @@
 version: '1.0'
 services:
-  db:
+  postgres:
     image: postgres:12-alpine
-    restart: always
     environment:
       - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=my-secret
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=trello
     ports:
       - '5432:5432'
     volumes:
@@ -13,13 +13,13 @@ services:
   app:
     build: .
     ports:
-      - '8081:8081'
+      - '8080:8080'
     depends_on:
       - postgres
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/trellodb
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/trello
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: my-secret
+      SPRING_DATASOURCE_PASSWORD: password
 
 volumes:
   postgres-data:
