@@ -7,5 +7,6 @@ public enum Color {
     LIME,
     CYAN,
     PURPLE,
-    ORANGE
+    ORANGE,
+    CUSTOM
 }
