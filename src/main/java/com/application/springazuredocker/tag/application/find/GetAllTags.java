@@ -1,6 +1,8 @@
 package com.application.springazuredocker.tag.application.find;
 
-import com.application.springazuredocker.tag.infrastructure.entity.Tag;
+import com.application.springazuredocker.tag.domain.mappers.MapperTagToResponse;
+import com.application.springazuredocker.tag.domain.records.TagResponse;
+import com.application.springazuredocker.tag.infrastructure.entity.TagEntity;
 import com.application.springazuredocker.tag.infrastructure.repository.TagRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,8 +31,9 @@ public class GetAllTags {
      * Method for get list of all tags
      * @return List<Tag>
      * */
-    public List<Tag> execute() {
+    public List<TagResponse> execute() {
         logger.info("Searching all tags");
-        return tagRepository.findAll();
+        List<TagEntity> listOfTags = tagRepository.findAll();
+        return MapperTagToResponse.listToResponse(listOfTags);
     }
 }

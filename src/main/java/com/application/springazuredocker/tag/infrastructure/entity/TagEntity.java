@@ -34,5 +34,25 @@ public class TagEntity {
     }
 
     public TagEntity() {}
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public String getDescription() {
+        return description;
+    }
 }
 
