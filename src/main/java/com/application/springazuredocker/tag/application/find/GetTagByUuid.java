@@ -1,6 +1,7 @@
 package com.application.springazuredocker.tag.application.find;
 
 import com.application.springazuredocker.shared.domain.exceptions.PageNotFoundException;
+import com.application.springazuredocker.tag.domain.exceptions.TagNotFoundException;
 import com.application.springazuredocker.tag.domain.mappers.MapperTagToResponse;
 import com.application.springazuredocker.tag.domain.records.TagResponse;
 import com.application.springazuredocker.tag.infrastructure.entity.TagEntity;
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class GetAllTags {
+public class GetTagByUuid {
     /**
      * Logger for register logs in the use case
      * */
@@ -28,28 +29,15 @@ public class GetAllTags {
      * Constructor method
      * @param tagRepository
      * */
-    public GetAllTags(TagRepository tagRepository) {
+    public GetTagByUuid(TagRepository tagRepository) {
         this.tagRepository = tagRepository;
     }
-    /**
-     * Method for get list of all tags
-     * @return List<Tag>
-     * */
-    public List<TagResponse> execute(Integer page, Integer size) throws PageNotFoundException {
-        Pageable pageable = PageRequest.of(page, size);
-        // validate if the page is less than 0
-        if (page < 0) {
-            logger.error("The page is less than 0");
-            throw new PageNotFoundException("The page is less than 0");
+
+    public TagResponse execute(String uuid) throws TagNotFoundException {
+        TagEntity tagEntity = tagRepository.findByUuid(uuid);
+        if (tagEntity == null) {
+            throw new TagNotFoundException("Tag not found by uuid: " + uuid);
         }
-        // validate if the max size is greater than 100 then only return 100
-        if (size > 100) {
-            logger.warn("The size is greater than 100");
-            size = 100;
-        }
-        Page<TagEntity> pageableOfTags = tagRepository.findAll(pageable);
-        List<TagEntity> listOfTags = pageableOfTags.toList();
-        logger.info("Returning all tags");
-        return MapperTagToResponse.listToResponse(listOfTags);
+        return MapperTagToResponse.toResponse(tagEntity);
     }
 }
