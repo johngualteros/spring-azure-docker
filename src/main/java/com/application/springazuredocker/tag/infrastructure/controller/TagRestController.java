@@ -1,8 +1,10 @@
 package com.application.springazuredocker.tag.infrastructure.controller;
 
+import com.application.springazuredocker.shared.domain.exceptions.HttpExceptions;
 import com.application.springazuredocker.shared.domain.exceptions.PageNotFoundException;
 import com.application.springazuredocker.tag.application.find.GetAllTags;
 import com.application.springazuredocker.tag.application.find.GetTagByUuid;
+import com.application.springazuredocker.tag.domain.exceptions.TagNotFoundException;
 import com.application.springazuredocker.tag.domain.records.TagResponse;
 import com.application.springazuredocker.tag.infrastructure.repository.TagRepository;
 import com.azure.core.annotation.Get;
@@ -20,15 +22,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/tags")
 public class TagRestController {
-    private static String uri = "/api/v1/tags";
-    private TagRepository tagRepository;
-    private GetAllTags    getAllTagsUseCase;
+    private static final String URL = "/api/v1/tags";
+    private final GetAllTags    getAllTagsUseCase;
     private GetTagByUuid  getTagByUuidUseCase;
     public TagRestController(
             TagRepository tagRepository,
             GetAllTags getAllTagsUseCase
     ) {
-        this.tagRepository     = tagRepository;
         this.getAllTagsUseCase = getAllTagsUseCase;
     }
     /**
@@ -40,17 +40,20 @@ public class TagRestController {
         try {
             return ResponseEntity.ok(getAllTagsUseCase.execute(page, size));
         } catch (PageNotFoundException e) {
-            ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
-            pd.setTitle("Page not found");
-            pd.setType(URI.create(uri));
-            pd.setProperty("Error", e.getMessage());
-            return ResponseEntity.status(404).body(pd);
+            return HttpExceptions.createProblemResponse(HttpStatus.NOT_FOUND, URL, e.getMessage(), "Page not found", 404);
         } catch (Exception e) {
-            ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
-            pd.setTitle("Internal server error");
-            pd.setType(URI.create(uri));
-            pd.setProperty("Error", e.getMessage());
-            return ResponseEntity.status(500).body(pd);
+            return HttpExceptions.createProblemResponse(HttpStatus.INTERNAL_SERVER_ERROR, URL, e.getMessage(), "Internal server error", 500);
+        }
+    }
+
+    @Get("/{uuid}")
+    public ResponseEntity<?> getTagByUuid(@RequestParam("uuid") String uuid) {
+        try {
+            return ResponseEntity.ok(getTagByUuidUseCase.execute(uuid));
+        } catch (TagNotFoundException e) {
+            return HttpExceptions.createProblemResponse(HttpStatus.NOT_FOUND, URL, e.getMessage(), "Tag not found", 404);
+        } catch (Exception e) {
+            return HttpExceptions.createProblemResponse(HttpStatus.INTERNAL_SERVER_ERROR, URL, e.getMessage(), "Internal server error", 500);
         }
     }
 }
