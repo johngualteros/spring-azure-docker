@@ -34,6 +34,7 @@ public class GetAllTags {
     /**
      * Method for get list of all tags
      * @return List<Tag>
+     * TODO: VALIDATE THE PAGE AND SIZE MAKE PIPES
      * */
     public List<TagResponse> execute(Integer page, Integer size) throws PageNotFoundException {
         Pageable pageable = PageRequest.of(page, size);
