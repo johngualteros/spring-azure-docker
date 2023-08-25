@@ -1,11 +1,13 @@
 package com.application.springazuredocker.tag.infrastructure.controller;
 
 import com.application.springazuredocker.shared.domain.exceptions.HttpExceptions;
+import com.application.springazuredocker.shared.domain.exceptions.InvalidArgumentException;
 import com.application.springazuredocker.shared.domain.exceptions.PageNotFoundException;
 import com.application.springazuredocker.shared.domain.validators.ExistenceOfAttributes;
 import com.application.springazuredocker.tag.application.create.CreateTag;
 import com.application.springazuredocker.tag.application.find.GetAllTags;
 import com.application.springazuredocker.tag.application.find.GetTagByUuid;
+import com.application.springazuredocker.tag.application.update.UpdateTagByUuid;
 import com.application.springazuredocker.tag.domain.exceptions.TagAlreadyExistsException;
 import com.application.springazuredocker.tag.domain.exceptions.TagNotFoundException;
 import com.application.springazuredocker.tag.domain.model.TagDto;
@@ -23,19 +25,22 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/tags")
 public class TagRestController {
-    private static final String URL = "/api/v1/tags";
-    private final GetAllTags    getAllTagsUseCase;
-    private final GetTagByUuid  getTagByUuidUseCase;
-    private final CreateTag     createTagUseCase;
+    private static final String   URL = "/api/v1/tags";
+    private final GetAllTags      getAllTagsUseCase;
+    private final GetTagByUuid    getTagByUuidUseCase;
+    private final CreateTag       createTagUseCase;
+    private final UpdateTagByUuid updateTagUseCase;
     public TagRestController(
-            TagRepository tagRepository,
-            GetAllTags    getAllTagsUseCase,
-            GetTagByUuid  getTagByUuidUseCase,
-            CreateTag     createTagUseCase
+            TagRepository   tagRepository,
+            GetAllTags      getAllTagsUseCase,
+            GetTagByUuid    getTagByUuidUseCase,
+            CreateTag       createTagUseCase,
+            UpdateTagByUuid updateTagUseCase
     ) {
         this.getAllTagsUseCase   = getAllTagsUseCase;
         this.getTagByUuidUseCase = getTagByUuidUseCase;
         this.createTagUseCase    = createTagUseCase;
+        this.updateTagUseCase    = updateTagUseCase;
     }
     /**
      * Method for get all tags
@@ -83,6 +88,24 @@ public class TagRestController {
             return ResponseEntity.created(URI.create(URL)).body(createTagUseCase.execute(tag));
         } catch (TagAlreadyExistsException e) {
             return HttpExceptions.createProblemResponse(HttpStatus.CONFLICT, URL, e.getMessage(), "Tag already exists", 409);
+        } catch (Exception e) {
+            return HttpExceptions.createProblemResponse(HttpStatus.INTERNAL_SERVER_ERROR, URL, e.getMessage(), "Internal server error", 500);
+        }
+    }
+
+    /**
+     * Method for update a tag
+     * @return TagResponse
+     * @return ResponseEntity<?>
+     * */
+    @PutMapping("/{uuid}")
+    public ResponseEntity<?> updateTag(@RequestBody TagDto tag) {
+        try {
+            return ResponseEntity.ok(updateTagUseCase.execute(tag.getUuid(), tag));
+        } catch (TagNotFoundException e) {
+            return HttpExceptions.createProblemResponse(HttpStatus.NOT_FOUND, URL, e.getMessage(), "Tag not found", 404);
+        } catch (InvalidArgumentException e) {
+            return HttpExceptions.createProblemResponse(HttpStatus.BAD_REQUEST, URL, e.getMessage(), "Bad request", 400);
         } catch (Exception e) {
             return HttpExceptions.createProblemResponse(HttpStatus.INTERNAL_SERVER_ERROR, URL, e.getMessage(), "Internal server error", 500);
         }
