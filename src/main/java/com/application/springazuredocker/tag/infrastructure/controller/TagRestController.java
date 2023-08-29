@@ -5,6 +5,7 @@ import com.application.springazuredocker.shared.domain.exceptions.InvalidArgumen
 import com.application.springazuredocker.shared.domain.exceptions.PageNotFoundException;
 import com.application.springazuredocker.shared.domain.validators.ExistenceOfAttributes;
 import com.application.springazuredocker.tag.application.create.CreateTag;
+import com.application.springazuredocker.tag.application.delete.DeleteTagByUuid;
 import com.application.springazuredocker.tag.application.find.GetAllTags;
 import com.application.springazuredocker.tag.application.find.GetTagByUuid;
 import com.application.springazuredocker.tag.application.update.UpdateTagByUuid;
@@ -30,17 +31,20 @@ public class TagRestController {
     private final GetTagByUuid    getTagByUuidUseCase;
     private final CreateTag       createTagUseCase;
     private final UpdateTagByUuid updateTagUseCase;
+    private final DeleteTagByUuid deleteTagByUuid;
     public TagRestController(
             TagRepository   tagRepository,
             GetAllTags      getAllTagsUseCase,
             GetTagByUuid    getTagByUuidUseCase,
             CreateTag       createTagUseCase,
-            UpdateTagByUuid updateTagUseCase
+            UpdateTagByUuid updateTagUseCase,
+            DeleteTagByUuid deleteTagByUuid
     ) {
         this.getAllTagsUseCase   = getAllTagsUseCase;
         this.getTagByUuidUseCase = getTagByUuidUseCase;
         this.createTagUseCase    = createTagUseCase;
         this.updateTagUseCase    = updateTagUseCase;
+        this.deleteTagByUuid     = deleteTagByUuid;
     }
     /**
      * Method for get all tags
@@ -99,13 +103,29 @@ public class TagRestController {
      * @return ResponseEntity<?>
      * */
     @PutMapping("/{uuid}")
-    public ResponseEntity<?> updateTag(@RequestBody TagDto tag) {
+    public ResponseEntity<?> updateTag(@PathVariable String uuid, @RequestBody TagDto tag) {
         try {
-            return ResponseEntity.ok(updateTagUseCase.execute(tag.getUuid(), tag));
+            return ResponseEntity.ok(updateTagUseCase.execute(uuid, tag));
         } catch (TagNotFoundException e) {
             return HttpExceptions.createProblemResponse(HttpStatus.NOT_FOUND, URL, e.getMessage(), "Tag not found", 404);
         } catch (InvalidArgumentException e) {
             return HttpExceptions.createProblemResponse(HttpStatus.BAD_REQUEST, URL, e.getMessage(), "Bad request", 400);
+        } catch (Exception e) {
+            return HttpExceptions.createProblemResponse(HttpStatus.INTERNAL_SERVER_ERROR, URL, e.getMessage(), "Internal server error", 500);
+        }
+    }
+
+    /**
+     * Method for delete a tag
+     * @return DeleteTagResponse
+     * @return ResponseEntity<?>
+     * */
+    @DeleteMapping("/{uuid}")
+    public ResponseEntity<?> deleteTagByUuid(@PathVariable String uuid) {
+        try {
+            return ResponseEntity.ok(deleteTagByUuid.execute(uuid));
+        } catch (TagNotFoundException e) {
+            return HttpExceptions.createProblemResponse(HttpStatus.NOT_FOUND, URL, e.getMessage(), "Tag not found", 404);
         } catch (Exception e) {
             return HttpExceptions.createProblemResponse(HttpStatus.INTERNAL_SERVER_ERROR, URL, e.getMessage(), "Internal server error", 500);
         }
