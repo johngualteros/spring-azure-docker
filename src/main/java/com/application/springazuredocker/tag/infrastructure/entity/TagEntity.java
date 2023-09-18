@@ -16,7 +16,6 @@ public class TagEntity {
     private String color;
     @Column(nullable = true)
     private String description;
-    // TODO: add here the owner of tag
 
     public TagEntity(Long id, String uuid, String name, String color, String description) {
         this.id = id;
