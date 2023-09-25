@@ -1,5 +1,6 @@
 package com.application.springazuredocker.comment.infrastructure.entity;
 
+import com.application.springazuredocker.comment.domain.records.CreateCommentResponse;
 import com.application.springazuredocker.user.infrastructure.entity.UserEntity;
 import jakarta.persistence.*;
 
@@ -91,5 +92,9 @@ public class CommentEntity {
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public CreateCommentResponse toCreateCommentResponse() {
+        return new CreateCommentResponse(this.content, this.owner.getUuid());
     }
 }
