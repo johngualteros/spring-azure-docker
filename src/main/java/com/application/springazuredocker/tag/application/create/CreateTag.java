@@ -44,6 +44,7 @@ public class CreateTag {
             logger.error("Tag already exists with name: " + tag.getName());
             throw new TagAlreadyExistsException("Tag already exists with name: " + tag.getName());
         }
+        // TODO: return the tag created response
         return null;
     }
 }
